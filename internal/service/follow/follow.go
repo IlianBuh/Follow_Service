@@ -15,7 +15,6 @@ type Follower interface {
 type Unfollower interface {
 	Unfollow(context.Context, int, int) error
 }
-
 type FollowingsProvider interface {
 	ListFollowers(context.Context, int) ([]int, error)
 	ListFollowees(context.Context, int) ([]int, error)
