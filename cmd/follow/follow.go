@@ -1,9 +1,12 @@
 package main
 
 import (
+	"github.com/IlianBuh/Follow_Service/internal/app"
 	"github.com/IlianBuh/Follow_Service/internal/config"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 const (
@@ -19,9 +22,19 @@ func main() {
 
 	log.Info("", slog.Any("cfg", cfg))
 
-	// TODO: init application
+	application := app.New(log, cfg.GRPC.Port, cfg.StorageURL)
 
-	// TODO: start application
+	go application.GRPCApp.MustRun()
+
+	stop := make(chan os.Signal)
+
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	sign := <-stop
+
+	log.Info("received signal", slog.Any("signal", sign))
+
+	application.GRPCApp.Stop()
 }
 
 // setUpLogger returns set logger according to current environment
