@@ -1,5 +1,7 @@
 env: "local"
+user-info-port: 20202
 storage-url: "./storage/storage.db"
 grpc:
   port: 30303
   timeout: 10s
+  retry-count: 0

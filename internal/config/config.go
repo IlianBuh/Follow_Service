@@ -8,14 +8,16 @@ import (
 )
 
 type Config struct {
-	Env        string  `yaml:"env" env-default:"prod"`
-	StorageURL string  `yaml:"storage-url" env-required:"true"`
-	GRPC       GRPCObj `yaml:"grpc"`
+	Env          string  `yaml:"env" env-default:"prod"`
+	StorageURL   string  `yaml:"storage-url" env-required:"true"`
+	GRPC         GRPCObj `yaml:"grpc"`
+	UserInfoPort int     `yaml:"user-info-port" env-required:"true"`
 }
 
 type GRPCObj struct {
-	Port    int           `yaml:"port" env-default:"20202"`
-	Timeout time.Duration `yaml:"timeout" env-default:"5s"`
+	Port       int           `yaml:"port" env-default:"20202"`
+	Timeout    time.Duration `yaml:"timeout" env-default:"5s"`
+	RetryCount int           `yaml:"retry-count" env-default:"5"`
 }
 
 const (
