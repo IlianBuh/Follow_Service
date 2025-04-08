@@ -19,11 +19,15 @@ type FollowingsProvider interface {
 	ListFollowers(context.Context, int) ([]int, error)
 	ListFollowees(context.Context, int) ([]int, error)
 }
+type UsersChecker interface {
+	CheckUsers(ctx context.Context, uuids []int) (bool, error)
+}
 type Follow struct {
-	log    *slog.Logger
-	flw    Follower
-	unflw  Unfollower
-	flwPrv FollowingsProvider
+	log     *slog.Logger
+	flw     Follower
+	unflw   Unfollower
+	flwPrv  FollowingsProvider
+	usrChkr UsersChecker
 }
 
 // New returns new instance of service layer
@@ -32,12 +36,14 @@ func New(
 	flw Follower,
 	unflw Unfollower,
 	flwPrv FollowingsProvider,
+	usrChkr UsersChecker,
 ) *Follow {
 	return &Follow{
-		log:    log,
-		flw:    flw,
-		unflw:  unflw,
-		flwPrv: flwPrv,
+		log:     log,
+		flw:     flw,
+		unflw:   unflw,
+		flwPrv:  flwPrv,
+		usrChkr: usrChkr,
 	}
 }
 
@@ -54,7 +60,21 @@ func (f *Follow) Follow(
 		slog.Int("target", target),
 	)
 
-	err := f.flw.Follow(ctx, src, target)
+	exist, err := f.usrChkr.CheckUsers(ctx, []int{src, target})
+	if err != nil {
+		log.Error("failed to check users' existing", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	if !exist {
+		log.Warn(
+			"some user does not exist",
+			slog.Int("src", src),
+			slog.Int("target", target),
+		)
+		return fmt.Errorf("%s: %w", op, ErrInvalidUUIDs)
+	}
+
+	err = f.flw.Follow(ctx, src, target)
 	if err != nil {
 		if errors.Is(err, storage.ErrFollowing) {
 			log.Warn("user already following")
