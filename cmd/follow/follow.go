@@ -22,7 +22,7 @@ func main() {
 
 	log.Info("", slog.Any("cfg", cfg))
 
-	application := app.New(log, cfg.GRPC.Port, cfg.StorageURL)
+	application := app.New(log, cfg.GRPC.Port, cfg.UserInfoPort, cfg.StorageURL, cfg.GRPC.RetryCount, cfg.GRPC.Timeout)
 
 	go application.GRPCApp.MustRun()
 
