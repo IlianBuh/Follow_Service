@@ -2,8 +2,10 @@ package grpcfllw
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	followv1 "github.com/IlianBuh/Follow_Protobuf/gen/go"
+	"github.com/IlianBuh/Follow_Service/internal/service/follow"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -38,7 +40,9 @@ func (s *serverAPI) Follow(
 
 	err := s.fllw.Follow(ctx, pars[0], pars[1])
 	if err != nil {
-		// TODO : handle error when users are not found
+		if errors.Is(err, follow.ErrInvalidUUIDs) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
